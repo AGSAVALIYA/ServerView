@@ -1,0 +1,22 @@
+/* light-mode.css */
+body {
+    background-color: #ffffff;
+    color: #000000;
+    font-family: Arial, sans-serif; /* Default font */
+}
+
+.log-container pre {
+    background-color: #f0f0f0;
+    font-family: 'Courier New', Courier, monospace; /* Example of a monospaced font */
+}
+
+.continous-loading {
+    color: #007BFF; /* Loading text color */
+    font-family: 'Roboto', Arial, sans-serif; /* Example of a different font */
+}
+
+.navbar {
+    background-color: #f0f0f0;
+    color: #000;
+    font-family: 'Open Sans', Arial, sans-serif; /* Example of a different font */
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM2 Log Viewer</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" id="themeStylesheet" href="light-mode.css">
+</head>
+
+<body>
+    <div class="navbar">
+        <h1>PM2 Log Viewer</h1>
+        <div class="theme-select">
+            <label for="themeSelect">Select Theme:</label>
+            <select id="themeSelect">
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+                <option value="retro">Retro Mode</option>
+            </select>
+        </div>
+    </div>
+    <div class="content">
+
+        <label for="processSelect">Select Process:</label>
+        <select id="processSelect">
+            <option value="">-- Select Process --</option>
+        </select>
+        <br>
+        <div class="monit-container">
+            <div id="cpuUsage"></div>
+            <div id="ramUsage"></div>
+        </div>
+        <div class="log-container">
+            <pre id="outLog-main"></pre>
+            <pre id="errorLog"></pre>
+        </div>
+        <div id="noProcessMessage" style="color: red; font-weight: bold; margin: 10px;">
+            Select a process to continue
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const processSelect = document.getElementById('processSelect');
+            const themeSelect = document.getElementById('themeSelect');
+            const themeStylesheet = document.getElementById('themeStylesheet');
+            const outLog = document.getElementById('outLog-main');
+            const errorLog = document.getElementById('errorLog');
+            const noProcessMessage = document.getElementById('noProcessMessage'); // New line
+            let currentProcessName = '';
+
+            // Create loading indicators
+            const createLoadingIndicator = () => {
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'continous-loading';
+                loadingIndicator.textContent = '...';
+                return loadingIndicator;
+            };
+
+            const continousLoadingOut = createLoadingIndicator();
+            const continousLoadingError = createLoadingIndicator();
+
+            // Append initial loading indicators
+            outLog.appendChild(continousLoadingOut);
+            errorLog.appendChild(continousLoadingError);
+
+            // Function to fetch logs and update logOutput
+            const fetchLogs = () => {
+                if (!currentProcessName) {
+                    outLog.textContent = ''; // Clear previous out logs
+                    errorLog.textContent = ''; // Clear previous error logs
+                    noProcessMessage.style.display = 'block'; // Show the message
+                    return;
+                }
+
+                // Hide the message if a process is selected
+                noProcessMessage.style.display = 'none';
+                //cahange log-container from display none to block
+                document.querySelector('.log-container').style.display = 'flex';
+                //monit-container from display none to block
+                document.querySelector('.monit-container').style.display = 'block';
+
+                // Fetch out log
+                fetch(`/api/logs/${encodeURIComponent(currentProcessName)}/out`)
+                    .then(response => response.text())
+                    .then(logs => {
+                        const isScrolledToBottom = outLog.scrollHeight - outLog.clientHeight <= outLog.scrollTop + 1;
+                        outLog.textContent = logs;
+                        outLog.appendChild(continousLoadingOut); // Re-append loading indicator
+                        if (isScrolledToBottom) {
+                            outLog.scrollTop = outLog.scrollHeight;
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching out logs for process ${currentProcessName}:`, error);
+                        outLog.textContent = `Error fetching logs. Please try again later.`;
+                        outLog.appendChild(continousLoadingOut); // Re-append loading indicator
+                    });
+
+                // Fetch error log
+                fetch(`/api/logs/${encodeURIComponent(currentProcessName)}/error`)
+                    .then(response => response.text())
+                    .then(logs => {
+                        const isScrolledToBottom = errorLog.scrollHeight - errorLog.clientHeight <= errorLog.scrollTop + 1;
+                        errorLog.textContent = logs;
+                        errorLog.appendChild(continousLoadingError); // Re-append loading indicator
+                        if (isScrolledToBottom) {
+                            errorLog.scrollTop = errorLog.scrollHeight;
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching error logs for process ${currentProcessName}:`, error);
+                        errorLog.textContent = `Error fetching logs. Please try again later.`;
+                        errorLog.appendChild(continousLoadingError); // Re-append loading indicator
+                    });
+
+                fetch(`/api/monit/${encodeURIComponent(currentProcessName)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const cpuUsage = document.getElementById('cpuUsage');
+                        const ramUsage = document.getElementById('ramUsage');
+                        cpuUsage.textContent = `CPU Usage: ${data.cpu}%`;
+                        ramUsage.textContent = `RAM Usage: ${data.memory} MB`;
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching monit data for process ${currentProcessName}:`, error);
+                        cpuUsage.textContent = `Error fetching monit data. Please try again later.`;
+                        ramUsage.textContent = `Error fetching monit data. Please try again later.`;
+                    });
+
+            };
+
+            // Fetch list of processes from server
+            fetch('/api/processes')
+                .then(response => response.json())
+                .then(processes => {
+                    processes.forEach(process => {
+                        const option = document.createElement('option');
+                        option.value = process.name;
+                        option.textContent = `${process.name} (ID: ${process.pm_id})`;
+                        processSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching processes:', error));
+
+            // Event listener for process selection
+            processSelect.addEventListener('change', () => {
+                currentProcessName = processSelect.value;
+                fetchLogs(); // Fetch logs initially
+            });
+
+            // Polling for live updates every 3 seconds (adjust as needed)
+            setInterval(() => {
+                if (currentProcessName) {
+                    fetchLogs();
+                }
+            }, 3000); // 3 seconds interval (adjust as needed)
+
+            // Continous loading animation
+            setInterval(() => {
+                const loadingElements = [continousLoadingOut, continousLoadingError];
+                loadingElements.forEach(el => {
+                    el.textContent += '.';
+                    if (el.textContent.length > 3) {
+                        el.textContent = '.';
+                    }
+                });
+            }, 1000);
+
+            // Load saved theme from localStorage
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) {
+                themeStylesheet.href = savedTheme + '-mode.css'; // Adjust for new themes
+                themeSelect.value = savedTheme;
+            }
+
+            // Theme selection event listener
+            themeSelect.addEventListener('change', () => {
+                const selectedTheme = themeSelect.value;
+                if (selectedTheme === 'dark') {
+                    themeStylesheet.href = 'dark-mode.css';
+                } else {
+                    themeStylesheet.href = selectedTheme + '-mode.css'; // Adjust for new themes
+                }
+                localStorage.setItem('selectedTheme', selectedTheme);
+            });
+        });
+
+    </script>
+</body>
+
+</html>

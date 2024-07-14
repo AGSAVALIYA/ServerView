@@ -1,0 +1,22 @@
+/* dark-mode.css */
+body {
+    background-color: #333333;
+    color: #ffffff;
+    font-family: 'Roboto', Arial, sans-serif; /* Example of a different font */
+}
+
+.log-container pre {
+    background-color: #444444;
+    font-family: 'Consolas', 'Lucida Console', monospace; /* Example of a monospaced font */
+}
+
+.continous-loading {
+    color: #FFDD00; /* Loading text color */
+    font-family: 'Arial', sans-serif; /* Default font */
+}
+
+.navbar {
+    background-color: #333;
+    color: white;
+    font-family: 'Montserrat', Arial, sans-serif; /* Example of a different font */
+}

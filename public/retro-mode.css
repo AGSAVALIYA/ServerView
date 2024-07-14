@@ -1,0 +1,22 @@
+/* retro-mode.css */
+body {
+    background-color: #ffeeaa;
+    color: #663300;
+    font-family: 'Times New Roman', Times, serif; /* Example of a serif font */
+}
+
+.log-container pre {
+    background-color: #ddbb77;
+    font-family: 'Georgia', serif; /* Example of another serif font */
+}
+
+.continous-loading {
+    color: #aa6600; /* Loading text color */
+    font-family: 'Arial', sans-serif; /* Default font */
+}
+
+.navbar {
+    background-color: #996633;
+    color: #ffffff;
+    font-family: 'Verdana', Geneva, sans-serif; /* Example of a sans-serif font */
+}

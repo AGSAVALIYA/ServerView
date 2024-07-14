@@ -1,0 +1,76 @@
+/* main.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding-top: 70px; /* Add padding to avoid content overlap with the navbar */
+}
+
+select {
+    padding: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.log-container {
+    display: none;
+    justify-content: space-between;
+    margin: 0 10px;
+}
+
+.log-container pre {
+    padding: 10px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    flex-basis: 48%; /* Adjust width as needed */
+    max-height: 400px; /* Limit height for scrolling */
+    overflow-y: auto; /* Enable vertical scroll if content exceeds height */
+    position: relative;
+}
+
+.continous-loading {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+    text-align: left;
+}
+
+/* Top navbar styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 5px;
+    z-index: 1000; /* Ensure the navbar stays on top */
+    height: 60px; /* Set a fixed height */
+}
+
+.navbar select {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 0;
+    flex-shrink: 0; /* Prevent the select element from shrinking */
+}
+
+.theme-select {
+   margin-right: 30px;
+}
+
+.monit-container {
+    background-color: #f0f0f0;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    width: max-content;
+    color: #333;
+    display: none;
+}

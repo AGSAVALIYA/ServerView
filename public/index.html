@@ -28,6 +28,10 @@
             <option value="">-- Select Process --</option>
         </select>
         <br>
+        <label for="intervalInput">Update Interval (seconds):</label>
+        <input type="number" id="intervalInput" min="1" value="3">
+        <button id="updateIntervalBtn">Update Interval</button>
+        <br>
         <div class="monit-container">
             <div id="cpuUsage"></div>
             <div id="ramUsage"></div>
@@ -49,8 +53,12 @@
             const themeStylesheet = document.getElementById('themeStylesheet');
             const outLog = document.getElementById('outLog-main');
             const errorLog = document.getElementById('errorLog');
-            const noProcessMessage = document.getElementById('noProcessMessage'); // New line
+            const noProcessMessage = document.getElementById('noProcessMessage');
+            const intervalInput = document.getElementById('intervalInput');
+            const updateIntervalBtn = document.getElementById('updateIntervalBtn');
             let currentProcessName = '';
+            let updateInterval = 3000; // Default 3 seconds
+            let intervalId;
 
             // Create loading indicators
             const createLoadingIndicator = () => {
@@ -150,14 +158,24 @@
             processSelect.addEventListener('change', () => {
                 currentProcessName = processSelect.value;
                 fetchLogs(); // Fetch logs initially
+                clearInterval(intervalId);
+                intervalId = setInterval(fetchLogs, updateInterval);
             });
 
-            // Polling for live updates every 3 seconds (adjust as needed)
-            setInterval(() => {
+            // Event listener for updating interval
+            updateIntervalBtn.addEventListener('click', () => {
+                const newInterval = Math.max(1, parseInt(intervalInput.value, 10)) * 1000;
+                updateInterval = newInterval;
+                clearInterval(intervalId);
+                intervalId = setInterval(fetchLogs, updateInterval);
+            });
+
+            // Initial interval setup
+            intervalId = setInterval(() => {
                 if (currentProcessName) {
                     fetchLogs();
                 }
-            }, 3000); // 3 seconds interval (adjust as needed)
+            }, updateInterval);
 
             // Continous loading animation
             setInterval(() => {
